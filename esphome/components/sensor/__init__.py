@@ -96,9 +96,9 @@ SENSOR_SCHEMA = cv.MQTT_COMPONENT_SCHEMA.extend({
     cv.OnlyWith(CONF_MQTT_ID, 'mqtt'): cv.declare_id(mqtt.MQTTSensorComponent),
     cv.GenerateID(): cv.declare_id(Sensor),
     cv.Optional(CONF_UNIT_OF_MEASUREMENT): unit_of_measurement,
-    cv.Optional(CONF_ICON): icon,
     cv.Optional(CONF_ACCURACY_DECIMALS): accuracy_decimals,
-    cv.Optional(CONF_DEVICE_CLASS): device_class,
+    cv.Exclusive(CONF_ICON, CONF_ICON+CONF_DEVICE_CLASS): icon,
+    cv.Exclusive(CONF_DEVICE_CLASS, CONF_ICON+CONF_DEVICE_CLASS): device_class,
     cv.Optional(CONF_FORCE_UPDATE, default=False): cv.boolean,
     cv.Optional(CONF_EXPIRE_AFTER): cv.All(cv.requires_component('mqtt'),
                                            cv.Any(None, cv.positive_time_period_milliseconds)),
@@ -124,8 +124,6 @@ def sensor_schema(unit_of_measurement_, icon_, accuracy_decimals_, device_class_
         schema = schema.extend({
             cv.Optional(CONF_UNIT_OF_MEASUREMENT, default=unit_of_measurement_): unit_of_measurement
         })
-    if icon_ != ICON_EMPTY:
-        schema = schema.extend({cv.Optional(CONF_ICON, default=icon_): icon})
     if accuracy_decimals_ != 0:
         schema = schema.extend({
             cv.Optional(CONF_ACCURACY_DECIMALS, default=accuracy_decimals_): accuracy_decimals,
@@ -134,6 +132,8 @@ def sensor_schema(unit_of_measurement_, icon_, accuracy_decimals_, device_class_
         schema = schema.extend({
             cv.Optional(CONF_DEVICE_CLASS, default=device_class_): device_class
         })
+    elif icon_ != ICON_EMPTY:
+        schema = schema.extend({cv.Optional(CONF_ICON, default=icon_): icon})
     return schema
 
 
